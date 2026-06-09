@@ -10,7 +10,7 @@ from telegram.ext import (
 
 # НАСТРОЙКИ БОТА
 ADMIN_ID = "6636620529"
-TOKEN = "8773682081:AAGJaMEzfoPH84-NyCHfESQUm0Up5nZLbjs"
+TOKEN = "8773682081:AAGdGfefrBQ546rf5fGpNMSWCQAhbrNMFy8"
 
 
 # ХЕНДЛЕР КОМАНДЫ /start
