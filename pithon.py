@@ -109,9 +109,6 @@ async def main():
 
 # ТОЧКА ВХОДА (С правильными отступами)
 if __name__ == '__main__':
-    import asyncio
-    try:
-        asyncio.run(main())
-    except RuntimeError:
-        loop = asyncio.get_event_loop()
-        loop.run_until_complete(main())
+    # Если инициализация в main, просто вызываем run_polling без asyncio.run
+    # Но правильнее всего, чтобы в самом низу файла было просто:
+    app.run_polling()
