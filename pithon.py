@@ -109,4 +109,4 @@ async def main():
 
 # ТОЧКА ВХОДА (С правильными отступами)
 if __name__ == '__main__':
-    asyncio.run(main())
+    main()
