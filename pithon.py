@@ -109,6 +109,21 @@ async def main():
 
 # ТОЧКА ВХОДА (С правильными отступами)
 if __name__ == '__main__':
-    # Если инициализация в main, просто вызываем run_polling без asyncio.run
-    # Но правильнее всего, чтобы в самом низу файла было просто:
-    app.run_polling()
+    import asyncio
+    import sys
+
+    # На серверах Linux (как Render) настраиваем правильную политику циклов
+    if sys.platform != 'win32':
+        try:
+            import uvloop
+            asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
+        except ImportError:
+            pass
+
+    # Создаем чистый изолированный цикл событий и запускаем твой main()
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+    try:
+        loop.run_until_complete(main())
+    finally:
+        loop.close()
