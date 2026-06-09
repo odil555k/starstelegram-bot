@@ -1,129 +1,59 @@
 import asyncio
-from telegram import Update, ReplyKeyboardMarkup
-from telegram.ext import (
-    ApplicationBuilder,
-    CommandHandler,
-    MessageHandler,
-    ContextTypes,
-    filters
-)
+import sys
+from telegram import Update
+from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes
 
-# НАСТРОЙКИ БОТА
-ADMIN_ID = "6636620529"
+
+# ==========================================
+# 1. МЕСТО ДЛЯ ВСЕХ ТВОИХ ФУНКЦИЙ
+# ==========================================
+
+# Твоя функция /start (замени текст внутри на свой, если нужно)
+async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await update.message.reply_text("Привет! Я твой бот, и я успешно работаю на Render!")
+
+
+# Пример другой функции (если у тебя есть другие команды, оставь их здесь)
+async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await update.message.reply_text("Тут текст помощи...")
+
+
+# ЕСЛИ У ТЕБЯ ЕСТЬ ДРУГИЕ ФУНКЦИИ (например, для обработки текста, кнопок и т.д.)
+# Просто вставляй их СЮДА одну за другой, как они были в твоем старом коде.
+
+
+# ==========================================
+# 2. НАСТРОЙКА БОТА И ОБОЛОЧКИ (Вынесено из main)
+# ==========================================
+
+# ВСТАВЬ СЮДА СВОЙ ТОКЕН ОТ @BotFather
 TOKEN = "8773682081:AAGdGfefrBQ546rf5fGpNMSWCQAhbrNMFy8"
 
+# Создаем приложение бота
+app = Application.builder().token(TOKEN).build()
 
-# ХЕНДЛЕР КОМАНДЫ /start
-async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    keyboard = [
-        ['Услуги', 'Техподдержка', 'Профиль']
-    ]
-    reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
+# РЕГИСТРАЦИЯ КОМАНД (Связываем функции с ботом)
+app.add_handler(CommandHandler("start", start))
+app.add_handler(CommandHandler("help", help_command))
 
-    await update.message.reply_text(
-        text="Приветствуем вас в нашем боте! Выберите, что вы хотите:",
-        reply_markup=reply_markup
-    )
+# ЕСЛИ У ТЕБЯ БЫЛИ ДРУГИЕ app.add_handler(...) В СТАРОМ КОДЕ:
+# Обязательно пропиши их прямо здесь, ниже этой строчки.
 
 
-# ХЕНДЛЕР ТЕКСТОВЫХ СООБЩЕНИЙ (Основная логика)
-async def handle(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    user = update.message.from_user
-    text = update.message.text
-    username = f"@{user.username}" if user.username else "нет username"
-
-    # 👤 ПРОФИЛЬ
-    if text == 'Профиль':
-        keyboard = [['Назад']]
-        reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
-
-        await update.message.reply_text(
-            f"👤 Профиль:\n"
-            f"ID: {user.id}\n"
-            f"Имя: {user.first_name}\n"
-            f"Username: {username}",
-            reply_markup=reply_markup
-        )
-
-    # ⬅️ НАЗАД
-    elif text == 'Назад':
-        await start(update, context)
-
-    # 🛠 ТЕХПОДДЕРЖКА
-    elif text == 'Техподдержка':
-        await update.message.reply_text(
-            f"🛠 Техподдержка: {username}\n"
-            f"Тех.Поддержка: @KoeiNG_spectaring"
-        )
-
-    # 🛒 УСЛУГИ
-    elif text == 'Услуги':
-        keyboard = [
-            ['50 звёзд', '100 звёзд'],
-            ['200 звёзд', '400 звёзд'],
-            ['500 звёзд']
-        ]
-        reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
-
-        await update.message.reply_text(
-            text="Выберите пакет:",
-            reply_markup=reply_markup
-        )
-
-    # ⭐️ ПОКУПКИ
-    elif text in ['50 звёзд', '100 звёзд', '200 звёзд', '400 звёзд', '500 звёзд']:
-        await update.message.reply_text(
-            f"💳 Чтобы купить {text}, отправьте оплату на реквизиты.\n"
-            f"После оплаты напишите в техподдержку.\n"
-            f"Номер карты.\n"
-            f"M/O"
-        )
-
-        # Уведомление админу (работает строго при покупке)
-        await context.bot.send_message(
-            chat_id=ADMIN_ID,
-            text=(
-                f"🛒 НОВАЯ ПОКУПКА!\n"
-                f"Пользователь: {username}\n"
-                f"ID: {user.id}\n"
-                f"Товар: {text}"
-            )
-        )
-
-    # ЕСЛИ НАПИСАНО ЧТО-ТО ДРУГОЕ
-    else:
-        await update.message.reply_text("Выберите кнопку из меню 👇")
-
-
-# ГЛАВНАЯ ФУНКЦИЯ ЗАПУСКА БОТА
-async def main():
-    app = ApplicationBuilder().token(TOKEN).build()
-
-    # Регистрация обработчиков
-    app.add_handler(CommandHandler("start", start))
-    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle))
-
-    # Исправлено: добавлен await для правильного асинхронного старта
-    await app.run_polling()
-
-
-# ТОЧКА ВХОДА (С правильными отступами)
+# ==========================================
+# 3. БРОНЕБОЙНЫЙ ЗАПУСК ДЛЯ RENDER
+# ==========================================
 if __name__ == '__main__':
-    import asyncio
-    import sys
+    print("Бот запускается в облаке...")
 
-    # На серверах Linux (как Render) настраиваем правильную политику циклов
+    # На Linux-серверах убираем конфликты циклов событий
     if sys.platform != 'win32':
         try:
             import uvloop
+
             asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
         except ImportError:
             pass
 
-    # Создаем чистый изолированный цикл событий и запускаем твой main()
-    loop = asyncio.new_event_loop()
-    asyncio.set_event_loop(loop)
-    try:
-        loop.run_until_complete(main())
-    finally:
-        loop.close()
+    # Запускаем бота с флагом close_loop=False, чтобы Render не выдавал ошибку закрытия
+    app.run_polling(close_loop=False)
