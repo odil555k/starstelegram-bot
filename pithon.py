@@ -27,7 +27,7 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 # =====================================================================
 
 # ВСТАВЬ СЮДА СВОЙ ТОКЕН ОТ @BotFather Вместо этих цифр
-TOKEN = "ТУТ_ВСТАВЬ_СВОЙ_ТОКЕН_БОТА"
+TOKEN = "8773682081:AAGdGfefrBQ546rf5fGpNMSWCQAhbrNMFy8"
 
 # Создаем приложение бота
 app = Application.builder().token(TOKEN).build()
