@@ -83,7 +83,7 @@ async def handle(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # ⭐ НАЖАЛИ STARS (Пакеты звёзд)
     elif text == 'Stars':
         keyboard = [
-            ['50 звёзд', '190 звёзд'],
+            ['50 звёзд', '100 звёзд'],
             ['200 звёзд', '300 звёзд'],
             ['400 звёзд', '500 звёзд'],
             ['Назад']
