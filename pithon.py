@@ -16,7 +16,7 @@ ADMIN_ID = 6636620529
 TOKEN = "8773682081:AAGdGfefrBQ546rf5fGpNMSWCQAhbrNMFy8"
 
 # ССЫЛКА НА ТВОЙ КАНАЛ С ОТЗЫВАМИ
-REVIEWS_CHANNEL_LINK = "https://t.me/KoeiNG_spectaring"
+REVIEWS_CHANNEL_LINK = "https://t.me/StarPay_chanel"
 
 # Создаем приложение бота сразу на верхнем уровне
 app = ApplicationBuilder().token(TOKEN).build()
