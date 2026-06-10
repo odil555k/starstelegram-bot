@@ -15,7 +15,9 @@ from telegram.ext import (
 ADMIN_ID = 6636620529
 TOKEN = "8773682081:AAGdGfefrBQ546rf5fGpNMSWCQAhbrNMFy8"
 
-# ССЫЛКА НА ТВОЙ КАНАЛ С ОТЗЫВАМИ
+# КАНАЛ ДЛЯ АВТОМАТИЧЕСКОЙ ПУБЛИКАЦИИ ОТЗЫВОВ (Бот должен быть админом там!)
+REVIEWS_CHANNEL_USERNAME = "@StarPay_chanel"
+# Ссылка для кнопки просмотра
 REVIEWS_CHANNEL_LINK = "https://t.me/StarPay_chanel"
 
 # Создаем приложение бота сразу на верхнем уровне
@@ -57,6 +59,7 @@ async def handle(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.message.from_user
     text = update.message.text
     username = f"@{user.username}" if user.username else "нет username"
+    first_name = user.first_name if user.first_name else "Покупатель"
 
     lang = context.user_data.get('lang', 'ru')
 
@@ -66,21 +69,41 @@ async def handle(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
         # Отправляем подтверждение пользователю
         if lang == 'uz':
-            user_msg = "✅ Fikr-mulohazangiz uchun rahmat! Sharhingiz adminga yuborildi."
+            user_msg = "✅ Fikr-mulohazangiz uchun rahmat! Sharhingiz kanalga joylashtirildi."
         else:
-            user_msg = "✅ Спасибо за ваш отзыв! Он успешно передан администратору."
+            user_msg = "✅ Спасибо за ваш отзыв! Он успешно опубликован на нашем канале."
 
         await update.message.reply_text(user_msg)
         await start(update, context)
 
-        # Пересылаем отзыв тебе (админу)
+        # Текст отзыва для публикации и пересылки
+        review_text = (
+            f"📝 **НОВЫЙ ОТЗЫВ О РАБОТЕ СЕРВИСА**\n\n"
+            f"👤 **Клиент:** {first_name} ({username})\n"
+            f"🆔 **ID:** `{user.id}`\n"
+            f"💬 **Отзыв:**\n{text}"
+        )
+
+        # 1. ОТПРАВЛЯЕМ ОТЗЫВ ПРЯМО НА КАНАЛ
+        try:
+            await context.bot.send_message(
+                chat_id=REVIEWS_CHANNEL_USERNAME,
+                text=review_text,
+                parse_mode="Markdown"
+            )
+        except Exception as e:
+            print(f"Ошибка публикации на канал: {e}")
+            # Если упало с ошибкой, значит бота забыли сделать админом в канале
+            await context.bot.send_message(
+                chat_id=ADMIN_ID,
+                text=f"⚠️ Ошибка публикации отзыва на канал! Проверьте, добавлен ли бот в администраторы канала {REVIEWS_CHANNEL_USERNAME}.\nОшибка: {e}"
+            )
+
+        # 2. Пересылаем копию отзыва тебе в ЛС (админу)
         await context.bot.send_message(
             chat_id=ADMIN_ID,
-            text=(
-                f"📝 НОВЫЙ ОТЗЫВ ОТ ПОЛЬЗОВАТЕЛЯ!\n\n"
-                f"👤 Пользователь: {username}\n"
-                f"💬 Текст отзыва:\n{text}"
-            )
+            text=f"🔔 Копия отзыва (отправлен в канал):\n\n{review_text}",
+            parse_mode="Markdown"
         )
         return
 
@@ -145,9 +168,9 @@ async def handle(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # ПОСМОТРЕТЬ ОТЗЫВЫ
     elif text == 'Посмотреть отзывы 👁':
         if lang == 'uz':
-            msg = f"Нажмите на ссылку, чтобы увидеть отзывы других пользователей:\n{REVIEWS_CHANNEL_LINK}"
+            msg = f"Bizning fikr-mulohazalar kanalimizga o'tish uchun havolani bosing:\n{REVIEWS_CHANNEL_LINK}"
         else:
-            msg = f"Нажмите на ссылку, чтобы перейти к отзывам наших клиентов:\n{REVIEWS_CHANNEL_LINK}"
+            msg = f"Нажмите на ссылку, чтобы перейти к отзывам на нашем канале:\n{REVIEWS_CHANNEL_LINK}"
         await update.message.reply_text(msg)
 
     # ОСТАВИТЬ ОТЗЫВ
@@ -176,7 +199,7 @@ async def handle(update: Update, context: ContextTypes.DEFAULT_TYPE):
         msg = "Что именно вас интересует? Выберите категорию:" if lang == 'ru' else "Sizni nima qiziqtiradi? Bo'limni tanlang:"
         await update.message.reply_text(msg, reply_markup=reply_markup)
 
-    # ⭐ STARS (Добавлен перевод кнопок для узбекского языка)
+    # ⭐ STARS
     elif text == 'Stars':
         back_btn = 'Назад' if lang == 'ru' else 'Orqaga'
         if lang == 'uz':
@@ -221,14 +244,14 @@ async def handle(update: Update, context: ContextTypes.DEFAULT_TYPE):
         reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
         await update.message.reply_text(msg, reply_markup=reply_markup)
 
-    # 💳 ВЫБРАЛИ КОНКРЕТНЫЙ ТОВАР (Включая узбекские кнопки Stars)
+    # 💳 ВЫБРАЛИ КОНКРЕТНЫЙ ТОВАР
     elif text in [
         '50 звёзд - 11.000 сум', '100 звёзд - 22.000 сум', '200 звёзд - 44.000 сум',
         '300 звёзд - 66.000 сум', '400 звёзд - 88.000 сум', '500 звёзд - 110.000 сум',
-        '50 ta yulduz - 11.000 som', '100 ta yulduz - 22.000 som', '200 ta yulduz - 44.000 som',
-        '300 ta yulduz - 66.000 som', '400 ta yulduz - 88.000 som', '500 ta yulduz - 110.000 som',
+        '50 ta yulduz - 11.000 so\'m', '100 ta yulduz - 22.000 so\'m', '200 ta yulduz - 44.000 so\'m',
+        '300 ta yulduz - 66.000 so\'m', '400 ta yulduz - 88.000 so\'m', '500 ta yulduz - 110.000 so\'m',
         'Премиум на 3 месяца - 165.000 сум', 'Премиум на 6 месяцев - 222.000 сум', 'Премиум на 1 год - 410.000 сум',
-        'Premium 3 oyga - 170.000 som', 'Premium 6 oyga - 230.000 som', 'Premium 1 yilga - 410.000 som'
+        'Premium 3 oyga - 165.000 sum', 'Premium 6 oyga - 222.000 sum', 'Premium 1 yilga - 410.000 sum'
     ]:
         context.user_data['selected_item'] = text
         context.user_data['waiting_for_photo'] = True
