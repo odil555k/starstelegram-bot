@@ -79,8 +79,6 @@ async def handle(update: Update, context: ContextTypes.DEFAULT_TYPE):
             text=(
                 f"📝 НОВЫЙ ОТЗЫВ ОТ ПОЛЬЗОВАТЕЛЯ!\n\n"
                 f"👤 Пользователь: {username}\n"
-                f"🆔 ID: {user.id}\n"
-                f"🌐 Язык: {lang.upper()}\n"
                 f"💬 Текст отзыва:\n{text}"
             )
         )
