@@ -147,7 +147,7 @@ async def handle(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # 🛠 ТЕХПОДДЕРЖКА
     elif text in ['Техподдержка', 'Texnik yordam']:
         if lang == 'uz':
-            msg = f"🛠 Texnik yordam: {username}\nTex.Yordam: @KoeiNG_spectaring"
+            msg = f"🛠 Texnik yordam: {username}\nЧасы работы:\nПонедельник-с 9.00 до 21.00\nВторник-с 9.00 до 21.00\nСреда-с 9.00 до 21.00\nЧертверг-с 9.00 до 21.00\n Пятница-с 9.00 до 21.00\nСуббота-с 9.00 до 21.00\nВоскресенье-с 9.00 до 21.00"
         else:
             msg = f"🛠 Техподдержка: {username}\n
         await update.message.reply_text(msg)
