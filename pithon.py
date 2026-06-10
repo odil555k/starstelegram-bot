@@ -78,10 +78,10 @@ async def handle(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
         # Текст отзыва для публикации и пересылки
         review_text = (
-            f"📝 **НОВЫЙ ОТЗЫВ О РАБОТЕ СЕРВИСА**\n\n"
-            f"👤 **Клиент:** {first_name} ({username})\n"
-            f"🆔 **ID:** `{user.id}`\n"
-            f"💬 **Отзыв:**\n{text}"
+            f"📝 <b>НОВЫЙ ОТЗЫВ О РАБОТЕ СЕРВИСА</b>\n\n"
+            f"👤 <b>Клиент:</b> {first_name} ({username})\n"
+            f"🆔 <b>ID:</b> {user.id}\n"
+            f"💬 <b>Отзыв:</b>\n{text}"
         )
 
         # 1. ОТПРАВЛЯЕМ ОТЗЫВ ПРЯМО НА КАНАЛ
@@ -89,7 +89,7 @@ async def handle(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await context.bot.send_message(
                 chat_id=REVIEWS_CHANNEL_USERNAME,
                 text=review_text,
-                parse_mode="Markdown"
+                parse_mode="HTML"
             )
         except Exception as e:
             print(f"Ошибка публикации на канал: {e}")
@@ -103,7 +103,7 @@ async def handle(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await context.bot.send_message(
             chat_id=ADMIN_ID,
             text=f"🔔 Копия отзыва (отправлен в канал):\n\n{review_text}",
-            parse_mode="Markdown"
+            parse_mode="HTML"
         )
         return
 
@@ -204,9 +204,9 @@ async def handle(update: Update, context: ContextTypes.DEFAULT_TYPE):
         back_btn = 'Назад' if lang == 'ru' else 'Orqaga'
         if lang == 'uz':
             keyboard = [
-                ['50 ta yulduz - 11.000 so\'m', '100 ta yulduz - 22.000 so\'m'],
-                ['200 ta yulduz - 44.000 so\'m', '300 ta yulduz - 66.000 so\'m'],
-                ['400 ta yulduz - 88.000 so\'m', '500 ta yulduz - 110.000 so\'m'],
+                ['50 ta yulduz - 11.000 soʻm', '100 ta yulduz - 22.000 soʻm'],
+                ['200 ta yulduz - 44.000 soʻm', '300 ta yulduz - 66.000 soʻm'],
+                ['400 ta yulduz - 88.000 soʻm', '500 ta yulduz - 110.000 soʻm'],
                 [back_btn]
             ]
         else:
@@ -226,9 +226,9 @@ async def handle(update: Update, context: ContextTypes.DEFAULT_TYPE):
         back_btn = 'Назад' if lang == 'ru' else 'Orqaga'
         if lang == 'uz':
             keyboard = [
-                ['Premium 3 oyga - 165.000 sum'],
-                ['Premium 6 oyga - 222.000 sum'],
-                ['Premium 1 yilga - 410.000 sum'],
+                ['Premium 3 oyga - 165.000 soʻm'],
+                ['Premium 6 oyga - 222.000 soʻm'],
+                ['Premium 1 yilga - 410.000 soʻm'],
                 [back_btn]
             ]
             msg = "Telegram Premium obuna tarifini tanlang:"
@@ -248,10 +248,10 @@ async def handle(update: Update, context: ContextTypes.DEFAULT_TYPE):
     elif text in [
         '50 звёзд - 11.000 сум', '100 звёзд - 22.000 сум', '200 звёзд - 44.000 сум',
         '300 звёзд - 66.000 сум', '400 звёзд - 88.000 сум', '500 звёзд - 110.000 сум',
-        '50 ta yulduz - 11.000 so\'m', '100 ta yulduz - 22.000 so\'m', '200 ta yulduz - 44.000 so\'m',
-        '300 ta yulduz - 66.000 so\'m', '400 ta yulduz - 88.000 so\'m', '500 ta yulduz - 110.000 so\'m',
+        '50 ta yulduz - 11.000 soʻm', '100 ta yulduz - 22.000 soʻm', '200 ta yulduz - 44.000 soʻm',
+        '300 ta yulduz - 66.000 soʻm', '400 ta yulduz - 88.000 soʻm', '500 ta yulduz - 110.000 soʻm',
         'Премиум на 3 месяца - 165.000 сум', 'Премиум на 6 месяцев - 222.000 сум', 'Премиум на 1 год - 410.000 сум',
-        'Premium 3 oyga - 165.000 sum', 'Premium 6 oyga - 222.000 sum', 'Premium 1 yilga - 410.000 sum'
+        'Premium 3 oyga - 165.000 soʻm', 'Premium 6 oyga - 222.000 soʻm', 'Premium 1 yilga - 410.000 soʻm'
     ]:
         context.user_data['selected_item'] = text
         context.user_data['waiting_for_photo'] = True
@@ -262,20 +262,20 @@ async def handle(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
         if lang == 'uz':
             msg = (
-                f"💳 {text} sotib olish uchun ko'rsatilgan rekvizitlarga to'lovni yuboring.\n"
-                f"karta.\n"
-                f"M/O/K.\n\n"
+                f"💳 <b>{text}</b> sotib olish uchun ko'rsatilgan rekvizitlarga to'lovni yuboring.\n\n"
+                f"Karta raqami (nusxa olish uchun ustiga bosing):\n"
+                f"<code>5614683589851641</code>\n\n"
                 f"❗ TO'LOVDAN SO'NG CHEK SKRINShOTINI (FOTO) SHU YERGA CHATGA YUBORING."
             )
         else:
             msg = (
-                f"💳 Чтобы купить {text}, отправьте оплату на реквизиты.\n"
-                f"карта.\n"
-                f"M/O/K.\n\n"
+                f"💳 Чтобы купить <b>{text}</b>, отправьте оплату на указанные реквизиты.\n\n"
+                f"Номер карты (нажмите для автоматического копирования):\n"
+                f"<code>5614683589851641</code>\n\n"
                 f"❗ ПОСЛЕ ОПЛАТЫ ОТПРАВЬТЕ СКРИНШОТ (ФОТО) ПРЯМО СЮДА В ЧАТ."
             )
 
-        await update.message.reply_text(msg, reply_markup=reply_markup)
+        await update.message.reply_text(msg, reply_markup=reply_markup, parse_mode="HTML")
 
     else:
         msg = "Выберите кнопку из меню 👇" if lang == 'ru' else "Menyudan tugmani tanlang 👇"
