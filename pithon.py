@@ -149,7 +149,7 @@ async def handle(update: Update, context: ContextTypes.DEFAULT_TYPE):
         if lang == 'uz':
             msg = f"🛠 Texnik yordam: {username}\nTex.Yordam: @KoeiNG_spectaring"
         else:
-            msg = f"🛠 Техподдержка: {username}\nТех.Поддержка: @KoeiNG_spectaring"
+            msg = f"🛠 Техподдержка: {username}\n
         await update.message.reply_text(msg)
 
     # 📝 МЕНЮ ОТЗЫВОВ
