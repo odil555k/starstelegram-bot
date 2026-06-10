@@ -25,18 +25,21 @@ app = ApplicationBuilder().token(TOKEN).build()
 
 # Главное меню (/start)
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    # Очищаем состояние ожидания фото, если пользователь вернулся в начало
-    context.user_data.clear()
+    # Очищаем состояние ожидания фото при перезапуске
+    context.user_data['waiting_for_photo'] = False
 
-    keyboard = [
-        ['Услуги', 'Техподдержка', 'Профиль']
-    ]
+    # Проверяем, какой язык выбран. Если не выбран — ставим русский по умолчанию
+    lang = context.user_data.get('lang', 'ru')
+
+    if lang == 'uz':
+        keyboard = [['Xizmatlar', 'Texnik yordam', 'Profil'], ['Tilni tanlash']]
+        text = "Botimizga xush kelibsiz! O'zingizga kerakli bo'limni tanlang:"
+    else:
+        keyboard = [['Услуги', 'Техподдержка', 'Профиль'], ['Выбрать язык']]
+        text = "Приветствуем вас в нашем боте! Выберите, что вы хотите:"
+
     reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
-
-    await update.message.reply_text(
-        "Приветствуем вас в нашем боте! Выберите, что вы хотите:",
-        reply_markup=reply_markup
-    )
+    await update.message.reply_text(text, reply_markup=reply_markup)
 
 
 # Обработчик текстовых сообщений и кнопок
@@ -45,114 +48,148 @@ async def handle(update: Update, context: ContextTypes.DEFAULT_TYPE):
     text = update.message.text
     username = f"@{user.username}" if user.username else "нет username"
 
-    # 👤 ПРОФИЛЬ
-    if text == 'Профиль':
-        keyboard = [['Назад']]
+    # Узнаем текущий язык пользователя
+    lang = context.user_data.get('lang', 'ru')
+
+    # 🌐 МЕНЮ ВЫБОРА ЯЗЫКА
+    if text in ['Выбрать язык', 'Tilni tanlash']:
+        keyboard = [['Русский 🇷🇺', 'O\'zbekcha 🇺🇿'], ['Назад' if lang == 'ru' else 'Orqaga']]
         reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
 
-        await update.message.reply_text(
-            f"👤 Профиль:\n"
-            f"ID: {user.id}\n"
-            f"Имя: {user.first_name}\n"
-            f"Username: {username}",
-            reply_markup=reply_markup
-        )
+        msg = "Выберите язык бота:" if lang == 'ru' else "Bot tilini tanlang:"
+        await update.message.reply_text(msg, reply_markup=reply_markup)
 
-    # 🔙 НАЗАД
-    elif text == 'Назад':
+    # УСТАНОВКА РУССКОГО ЯЗЫКА
+    elif text == 'Русский 🇷🇺':
+        context.user_data['lang'] = 'ru'
+        await update.message.reply_text("Язык бота успешно изменен на Русский! 🇷🇺")
         await start(update, context)
 
-    # 🛠 ТЕХПОДДЕРЖКА
-    elif text == 'Техподдержка':
-        await update.message.reply_text(
-            f"🛠 Техподдержка: {username}\nТех.Поддержка: @KoeiNG_spectaring"
-        )
+    # УСТАНОВКА УЗБЕКСКОГО ЯЗЫКА
+    elif text == "O'zbekcha 🇺🇿":
+        context.user_data['lang'] = 'uz'
+        await update.message.reply_text("Bot tili O'zbekchaga muvaffaqiyatli o'zgartirildi! 🇺🇿")
+        await start(update, context)
 
-    # 🛒 УСЛУГИ (Выбор между Stars и Премиум)
-    elif text == 'Услуги':
+    # 👤 ПРОФИЛЬ (Profil)
+    elif text in ['Профиль', 'Profil']:
+        back_btn = 'Назад' if lang == 'ru' else 'Orqaga'
+        keyboard = [[back_btn]]
+        reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
+
+        if lang == 'uz':
+            msg = f"👤 Profil:\nID: {user.id}\nIsm: {user.first_name}\nUsername: {username}"
+        else:
+            msg = f"👤 Профиль:\nID: {user.id}\nИмя: {user.first_name}\nUsername: {username}"
+
+        await update.message.reply_text(msg, reply_markup=reply_markup)
+
+    # 🔙 НАЗАД / ORQAGA
+    elif text in ['Назад', 'Orqaga']:
+        await start(update, context)
+
+    # 🛠 ТЕХПОДДЕРЖКА (Texnik yordam)
+    elif text in ['Техподдержка', 'Texnik yordam']:
+        if lang == 'uz':
+            msg = f"🛠 Texnik yordam: {username}\nTex.Yordam: @KoeiNG_spectaring"
+        else:
+            msg = f"🛠 Техподдержка: {username}\nТех.Поддержка: @KoeiNG_spectaring"
+        await update.message.reply_text(msg)
+
+    # 🛒 УСЛУГИ / XIZMATLAR
+    elif text in ['Услуги', 'Xizmatlar']:
+        back_btn = 'Назад' if lang == 'ru' else 'Orqaga'
         keyboard = [
-            ['Stars', 'Премиум'],
-            ['Назад']
+            ['Stars', 'Premium' if lang == 'uz' else 'Премиум'],
+            [back_btn]
         ]
         reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
-        await update.message.reply_text(
-            "Что именно вас интересует? Выберите категорию:",
-            reply_markup=reply_markup
-        )
 
-    # ⭐ НАЖАЛИ STARS (Пакеты звёзд)
+        msg = "Что именно вас интересует? Выберите категорию:" if lang == 'ru' else "Sizni nima qiziqtiradi? Bo'limni tanlang:"
+        await update.message.reply_text(msg, reply_markup=reply_markup)
+
+    # ⭐ STARS (Пакеты звёзд для обоих языков)
     elif text == 'Stars':
+        back_btn = 'Назад' if lang == 'ru' else 'Orqaga'
         keyboard = [
-            ['50 звёзд-11.000 сум', '100 звёзд-22.000 сум'],
-            ['200 звёзд-44.000 сум', '300 звёзд-66.000 сум'],
-            ['400 звёзд-88.000 сум', '500 звёзд-110.000 сум'],
-            ['Назад']
+            ['50 звёзд', '190 звёзд'],
+            ['200 звёзд', '300 звёзд'],
+            ['400 звёзд', '500 звёзд'],
+            [back_btn]
         ]
         reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
-        await update.message.reply_text(
-            "Выберите желаемый пакет Stars:",
-            reply_markup=reply_markup
-        )
 
-    # 💎 НАЖАЛИ ПРЕМИУМ (Добавили кнопки на 3, 6 месяцев и 1 год)
-    elif text == 'Premium' or text == 'Премиум':
-        keyboard = [
-            ['Премиум на 3 месяца-165.000 сум'],
-            ['Премиум на 6 месяцев-222.000 сум'],
-            ['Премиум на 1 год-406.000 сум'],
-            ['Назад']
-        ]
+        msg = "Выберите желаемый пакет Stars:" if lang == 'ru' else "Kerakli Stars paketini tanlang:"
+        await update.message.reply_text(msg, reply_markup=reply_markup)
+
+    # 💎 ПРЕМИУМ / PREMIUM
+    elif text in ['Премиум', 'Premium']:
+        back_btn = 'Назад' if lang == 'ru' else 'Orqaga'
+        if lang == 'uz':
+            keyboard = [['Premium 3 oyga'], ['Premium 6 oyga'], ['Premium 1 yilga'], [back_btn]]
+            msg = "Telegram Premium obuna tarifini tanlang:"
+        else:
+            keyboard = [['Премиум на 3 месяца'], ['Премиум на 6 месяцев'], ['Премиум на 1 год'], [back_btn]]
+            msg = "Выберите тариф подписки Telegram Premium:"
+
         reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
-        await update.message.reply_text(
-            "Выберите тариф подписки Telegram Premium:",
-            reply_markup=reply_markup
-        )
+        await update.message.reply_text(msg, reply_markup=reply_markup)
 
-    # 💳 ВЫБРАЛИ КОНКРЕТНЫЙ ТОВАР (Звёзды или Любой Премиум)
+    # 💳 ВЫБРАЛИ КОНКРЕТНЫЙ ТОВАР (Звёзды или Премиум на любом языке)
     elif text in [
-        '50 звёзд-11.000 сум', '100 звёзд-22.000 сум', '200 звёзд-44.000 сум', '300 звёзд-66.000 сум', '400 звёзд-88.000 сум', '500 звёзд-110.000 сум',
-        'Премиум на 3 месяца-165.000 сум', 'Премиум на 6 месяцев-222.000 сум-222.000 сум', 'Премиум на 1 год-406.000 сум'
+        '50 звёзд', '190 звёзд', '200 звёзд', '300 звёзд', '400 звёзд', '500 звёзд',
+        'Премиум на 3 месяца', 'Премиум на 6 месяцев', 'Премиум на 1 год',
+        'Premium 3 oyga', 'Premium 6 oyga', 'Premium 1 yilga'
     ]:
-        # Запоминаем, какой товар выбрал пользователь
         context.user_data['selected_item'] = text
-        # Включаем режим ожидания скриншота
         context.user_data['waiting_for_photo'] = True
 
-        keyboard = [['Назад']]
+        back_btn = 'Назад' if lang == 'ru' else 'Orqaga'
+        keyboard = [[back_btn]]
         reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
 
-        await update.message.reply_text(
-            f"💳 Чтобы купить {text}, отправьте оплату на реквизиты.\n"
-            f"карта.\n"
-            f"M/O/K.\n\n"
-            f"❗ ПОСЛЕ ОПЛАТЫ ОТПРАВЬТЕ СКРИНШОТ (ЧЕК) ПРЯМО СЮДА В ЧАТ.",
-            reply_markup=reply_markup
-        )
+        if lang == 'uz':
+            msg = (
+                f"💳 {text} sotib olish uchun ko'rsatilgan rekvizitlarga to'lovni yuboring.\n"
+                f"karta.\n"
+                f"M/O/K.\n\n"
+                f"❗ TO'LOVDAN SO'NG CHEK SKRINShOTINI (FOTO) SHU YERGA CHATGA YUBORING."
+            )
+        else:
+            msg = (
+                f"💳 Чтобы купить {text}, отправьте оплату на реквизиты.\n"
+                f"карта.\n"
+                f"M/O/K.\n\n"
+                f"❗ ПОСЛЕ ОПЛАТЫ ОТПРАВЬТЕ СКРИНШОТ (ФОТО) ПРЯМО СЮДА В ЧАТ."
+            )
+
+        await update.message.reply_text(msg, reply_markup=reply_markup)
 
     else:
-        await update.message.reply_text("Выберите кнопку из меню 👇")
+        msg = "Выберите кнопку из меню 👇" if lang == 'ru' else "Menyudan tugmani tanlang 👇"
+        await update.message.reply_text(msg)
 
 
-# 📷 ОБРАБОТЧИК ФОТОГРАФИЙ (Прием чеков и пересылка админу)
+# 📷 ОБРАБОТЧИК ФОТОГРАФИЙ
 async def handle_photo(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.message.from_user
     username = f"@{user.username}" if user.username else "нет username"
+    lang = context.user_data.get('lang', 'ru')
 
-    # Проверяем, ждем ли мы фото от этого пользователя
     if context.user_data.get('waiting_for_photo'):
         selected_item = context.user_data.get('selected_item', 'Неизвестный товар')
-
-        # Получаем ID фотографии
         photo_file_id = update.message.photo[-1].file_id
 
-        # 1. Говорим пользователю, что всё принято
-        await update.message.reply_text(
-            "✅ Ваш скриншот получен! Техподдержка проверит оплату и в течение 5 минут товар попадет на ваш счет.",
-        )
-        # Сразу возвращаем его в главное меню
+        # Ответ пользователю в зависимости от языка
+        if lang == 'uz':
+            user_msg = "✅ Skrinshootingiz qabul qilindi! Texnik yordam to'lovni tekshirib, siz bilan bog'lanadi."
+        else:
+            user_msg = "✅ Ваш скриншот получен! Техподдержка проверит оплату и свяжется с вами."
+
+        await update.message.reply_text(user_msg)
         await start(update, context)
 
-        # 2. ОТПРАВЛЯЕМ ФОТО + ТЕКСТ ТЕБЕ (АДМИНУ)
+        # ОТПРАВКА АДМИНУ (Всегда приходит в одном понятном формате)
         await context.bot.send_photo(
             chat_id=ADMIN_ID,
             photo=photo_file_id,
@@ -160,11 +197,13 @@ async def handle_photo(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 f"🛒 НОВАЯ ПОКУПКА СО СКРИНШОТОМ!\n\n"
                 f"👤 Пользователь: {username}\n"
                 f"🆔 ID: {user.id}\n"
-                f"🛍 Товар: {selected_item}"
+                f"🛍 Товар: {selected_item}\n"
+                f"🌐 Язык бота у юзера: {lang.upper()}"
             )
         )
     else:
-        await update.message.reply_text("Сначала выберите пакет услуг в меню, чтобы отправить чек.")
+        msg = "Сначала выберите пакет услуг в меню, чтобы отправить чек." if lang == 'ru' else "Chek yuborishdan oldin menyudan xizmatni tanlang."
+        await update.message.reply_text(msg)
 
 
 # =====================================================================
