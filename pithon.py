@@ -147,10 +147,24 @@ async def handle(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # 🛠 ТЕХПОДДЕРЖКА
     elif text in ['Техподдержка', 'Texnik yordam']:
         if lang == 'uz':
-            msg = f"🛠 Texnik yordam: {username}\nЧасы работы:\nПонедельник-с 9.00 до 21.00\nВторник-с 9.00 до 21.00\nСреда-с 9.00 до 21.00\nЧертверг-с 9.00 до 21.00\n Пятница-с 9.00 до 21.00\nСуббота-с 9.00 до 21.00\nВоскресенье-с 9.00 до 21.00"
+            msg = (
+                f"🛠 <b>Texnik yordam</b>\n\n"
+                f"👤 Foydalanuvchi: {username}\n"
+                f"👨‍💻 Tex.Yordam: @KoeiNG_spectaring\n\n"
+                f"⏰ <b>Ish vaqti:</b>\n"
+                f"Dushanbadan Yakshabagacha (Har kuni)\n"
+                f"Soat 9:00 dan 21:00 gacha"
+            )
         else:
-            msg = f"🛠 Техподдержка: {username}\n
-        await update.message.reply_text(msg)
+            msg = (
+                f"🛠 <b>Техподдержка</b>\n\n"
+                f"👤 Пользователь: {username}\n"
+                f"👨‍💻 Тех.Поддержка: @KoeiNG_spectaring\n\n"
+                f"⏰ <b>Время работы:</b>\n"
+                f"С понедельника по воскресенье (Каждый день)\n"
+                f"С 9:00 до 21:00"
+            )
+        await update.message.reply_text(msg, parse_mode="HTML")
 
     # 📝 МЕНЮ ОТЗЫВОВ
     elif text in ['Отзывы', 'Fikr-mulohazalar']:
@@ -196,7 +210,7 @@ async def handle(update: Update, context: ContextTypes.DEFAULT_TYPE):
         ]
         reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
 
-        msg = "Что именно вас интересует? Выберите категорию:" if lang == 'ru' else "Sizni nima qiziqtiradi? Bo'limni tanlang:"
+        msg = "Что именно вас интересует? Выберите категория:" if lang == 'ru' else "Sizni nima qiziqtiradi? Bo'limni tanlang:"
         await update.message.reply_text(msg, reply_markup=reply_markup)
 
     # ⭐ STARS
