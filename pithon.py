@@ -13,7 +13,7 @@ from telegram.ext import (
 # 1. НАСТРОЙКИ И ДАННЫЕ БОТА
 # =====================================================================
 ADMIN_ID = 6636620529
-TOKEN = "8773682081:AAGdGfefrBQ546rf5fGpNMSWCQAhbrNMFy8"
+TOKEN = "8220153564:AAFcLbwRTQdaSdaDbdbpEVtpP6-HTdbGGxU"
 
 # КАНАЛ ДЛЯ АВТОМАТИЧЕСКОЙ ПУБЛИКАЦИИ ОТЗЫВОВ (Бот должен быть админом там!)
 REVIEWS_CHANNEL_USERNAME = "@StarPay_chanel"
